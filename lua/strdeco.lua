@@ -17,7 +17,10 @@ end
 local function convert_lines(lines, conversion)
 	local result = {}
 	if conversion.before then
-		table.insert(result, conversion.before(lines))
+		local before = conversion.before(lines)
+		if before ~= nil then
+			table.insert(result, before)
+		end
 	end
 
 	local line_count = 0
@@ -33,7 +36,10 @@ local function convert_lines(lines, conversion)
 	end
 
 	if conversion.after then
-		table.insert(result, conversion.after(lines))
+		local after = table.insert(result, conversion.after(lines))
+		if after ~= nil then
+			table.insert(result, after)
+		end
 	end
 
 	return result
