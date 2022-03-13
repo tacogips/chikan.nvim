@@ -18,10 +18,10 @@ use({
 ## Usage
 ```
 # on current line
-:StrDeco <convertion_name>
+:StrDeco <convresion_name>
 
 # or on selected lines.(the rectangle selection is not supported)
-:'<,'> StrDeco <convertion_name>
+:'<,'> StrDeco <convresion_name>
 
 ```
 
