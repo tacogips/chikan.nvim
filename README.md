@@ -1,6 +1,7 @@
 # StrDeco
 A string replacement neovim plugin, written in lua.
 
+![preview](https://github.com/tacogips/strdeco.nvim/blob/main/doc/preview.gif?raw=true)
 
 ## Install and setup
 
