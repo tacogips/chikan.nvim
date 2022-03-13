@@ -7,7 +7,6 @@ local api = vim.api
 local M = {}
 
 local config = {
-	buildins = convert.buildins,
 	custom_conversion = {},
 }
 
@@ -65,7 +64,7 @@ function M.convert_selected_area(range_start_row, range_end_row, conversion_name
 
 	local conversion = config.custom_conversion[conversion_name]
 	if conversion == nil then
-		conversion = config.buildins[conversion_name]
+		conversion = convert.buildins[conversion_name]
 
 		if conversion == nil then
 			error("no such conversion method [" .. conversion_name .. "]")
