@@ -5,7 +5,7 @@ A string replacement neovim plugin, written in lua.
 
 ## Install and setup
 
-```
+```lua
 -- with Packer
 use({
   "tacogips/strdeco.nvim",
