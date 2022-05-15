@@ -45,10 +45,73 @@ local function convert_lines(lines, conversion)
 	return result
 end
 
+local function do_conversion(bufnr, conversion_name, start_row, end_row)
+	print(conversion_name)
+	local target_lines = buffer.get_lines(bufnr, start_row, end_row)
+	local last_column_length = buffer.get_row_column_length(bufnr, end_row)
+
+	local conversion = config.custom_conversion[conversion_name]
+	if conversion == nil then
+		conversion = convert.buildins[conversion_name]
+
+		if conversion == nil then
+			error("no such conversion method [" .. conversion_name .. "]")
+			return
+		end
+	end
+
+	local output = convert_lines(target_lines, conversion)
+	write_to_buf(bufnr, start_row, end_row, last_column_length, output)
+end
+
+local function get_conversion_keys()
+	local keys = {}
+
+	for key, _ in pairs(convert.buildins) do
+		table.insert(keys, key)
+	end
+
+	for key, _ in pairs(config.custom_conversion) do
+		table.insert(keys, key)
+	end
+
+	return keys
+end
+
+local function select_conversions(bufnr, start_row, end_row)
+	local pickers = require("telescope.pickers")
+	local finders = require("telescope.finders")
+	local conf = require("telescope.config").values
+	local actions = require("telescope.actions")
+	local action_state = require("telescope.actions.state")
+
+	local selector = function(opts)
+		opts = opts or {}
+		pickers.new(opts, {
+			prompt_title = "converters",
+			finder = finders.new_table({
+				results = get_conversion_keys(),
+			}),
+			sorter = conf.generic_sorter(opts),
+			attach_mappings = function(prompt_bufnr, map)
+				actions.select_default:replace(function()
+					actions.close(prompt_bufnr)
+					local selection = action_state.get_selected_entry()
+					local conversion_name = selection[1]
+					do_conversion(bufnr, conversion_name, start_row, end_row)
+				end)
+				return true
+			end,
+		}):find()
+	end
+
+	selector()
+end
+
 function M.setup(user_options)
 	config = vim.tbl_deep_extend("force", config, user_options)
 
-	cmd([[command! -range  -nargs=1 StrDeco :lua require("strdeco").convert_selected_area(<line1>,<line2>,"<args>")]])
+	cmd([[command! -range  -nargs=? StrDeco :lua require("strdeco").convert_selected_area(<line1>,<line2>,"<args>")]])
 end
 
 function M.convert_selected_area(range_start_row, range_end_row, conversion_name)
@@ -65,21 +128,11 @@ function M.convert_selected_area(range_start_row, range_end_row, conversion_name
 		return
 	end
 
-	local target_lines = buffer.get_lines(bufnr, start_row, end_row)
-	local last_column_length = buffer.get_row_column_length(bufnr, end_row)
-
-	local conversion = config.custom_conversion[conversion_name]
-	if conversion == nil then
-		conversion = convert.buildins[conversion_name]
-
-		if conversion == nil then
-			error("no such conversion method [" .. conversion_name .. "]")
-			return
-		end
+	if conversion_name == nil or conversion_name == "" then
+		select_conversions(bufnr, start_row, end_row)
+	else
+		do_conversion(bufnr, conversion_name, start_row, end_row)
 	end
-
-	local output = convert_lines(target_lines, conversion)
-	write_to_buf(bufnr, start_row, end_row, last_column_length, output)
 end
 
 return M

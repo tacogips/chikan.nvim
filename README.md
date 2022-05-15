@@ -9,6 +9,7 @@ A string replacement neovim plugin, written in lua.
 -- with Packer
 use({
   "tacogips/strdeco.nvim",
+  requires = { { "nvim-telescope/telescope.nvim" } },
   config = function()
     require("strdeco").setup({})
   end,
